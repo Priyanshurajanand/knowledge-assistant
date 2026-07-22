@@ -10,23 +10,22 @@ The system is designed with a **Hybrid Retrieval Engine** to achieve high accura
 
 ```mermaid
 graph TD
-    User([User Client]) <-->|Angular 19 App| FE[Frontend Dashboard & Admin Panel]
-    FE <-->|REST APIs / JWT| BE[FastAPI Backend Server]
+    User["User Client (Angular 19)"] <-->|REST APIs / JWT| BE["FastAPI Backend Server"]
     
     subgraph Storage & Retrieval Layer
-        BE <-->|PostgreSQL (asyncpg)| DB[(PostgreSQL Database)]
-        BE <-->|Qdrant Client| QDR[(Qdrant Vector DB)]
-        BE --->|SentenceTransformers| LocalEmbed[Local Embedding Generator<br>all-MiniLM-L6-v2]
+        BE <-->|PostgreSQL asyncpg| DB[("PostgreSQL Database")]
+        BE <-->|Qdrant Client| QDR[("Qdrant Vector DB")]
+        BE --->|SentenceTransformers| LocalEmbed["Local Embedding Generator (all-MiniLM-L6-v2)"]
     end
     
     subgraph Multi-LLM Routing
-        BE <-->|Groq API| Groq[Groq Llama 3.3]
-        BE <-->|OpenAI API| OpenAI[OpenAI GPT-4o]
-        BE <-->|Gemini API| Gemini[Google Gemini 1.5]
-        BE <-->|Anthropic API| Claude[Claude 3.5 Sonnet]
+        BE <-->|Groq API| Groq["Groq Llama 3.3"]
+        BE <-->|OpenAI API| OpenAI["OpenAI GPT-4o"]
+        BE <-->|Gemini API| Gemini["Google Gemini 1.5"]
+        BE <-->|Anthropic API| Claude["Claude 3.5 Sonnet"]
     end
     
-    DB --- DB_Tables[Users & User Settings<br>Conversations & Messages<br>Documents & Chunk Metadata<br>System Audit Logs]
+    DB --- DB_Tables["Users & User Settings<br>Conversations & Messages<br>Documents & Chunk Metadata<br>System Audit Logs"]
 ```
 
 ### 1. Hybrid Search with Reciprocal Rank Fusion (RRF)
