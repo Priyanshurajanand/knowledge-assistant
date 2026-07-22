@@ -458,19 +458,26 @@ export class DashboardComponent implements OnInit {
   }
 
   retryMessage(msg: Message): void {
-    // Re-send the last user question. We find it in the history
-    const userMsgs = this.messages().filter(m => m.role === 'user');
-    if (userMsgs.length === 0) return;
+    const allMsgs = this.messages();
+    const targetIdx = allMsgs.findIndex(m => (m.id && m.id === msg.id) || m === msg);
+    if (targetIdx === -1) return;
 
-    const lastUserMsg = userMsgs[userMsgs.length - 1];
-    this.inputText.set(lastUserMsg.content);
-
-    // If the last message was assistant, remove it locally before retry to avoid double display
-    const lastMsg = this.messages()[this.messages().length - 1];
-    if (lastMsg.role === 'assistant') {
-      this.messages.update(m => m.slice(0, -1));
+    let targetPrompt = '';
+    if (msg.role === 'user') {
+      targetPrompt = msg.content;
+    } else {
+      // Search backwards to find the specific user question for this message
+      for (let i = targetIdx - 1; i >= 0; i--) {
+        if (allMsgs[i].role === 'user') {
+          targetPrompt = allMsgs[i].content;
+          break;
+        }
+      }
     }
 
+    if (!targetPrompt) return;
+
+    this.inputText.set(targetPrompt);
     this.sendMessage();
   }
 
