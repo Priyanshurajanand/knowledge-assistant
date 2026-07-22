@@ -1,0 +1,4 @@
+Source File: {filename} | Page: {page_number}
+Content:
+{text}
+=========================================

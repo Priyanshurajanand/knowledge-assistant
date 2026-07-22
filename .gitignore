@@ -1,0 +1,45 @@
+# Environment & Secrets (CRITICAL: Never commit real API keys)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+virtual-backend/
+virtual-backend*/
+backend/virtual-backend/
+backend/virtual-backend*/
+
+# Storage / Local Uploads
+backend/storage/documents/*
+!backend/storage/documents/.gitkeep
+
+# Node.js & Angular
+node_modules/
+frontend/node_modules/
+.angular/
+frontend/.angular/
+dist/
+frontend/dist/
+.sass-cache/
+
+# Database & Migration Sqlite / Temp Files
+*.sqlite
+*.sqlite3
+*.db
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log
+scratch/

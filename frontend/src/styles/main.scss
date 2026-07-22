@@ -1,0 +1,349 @@
+@use '@angular/material' as mat;
+@use 'variables' as *;
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import '@angular/cdk/overlay-prebuilt.css';
+
+// Core reset
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: $font-sans;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+// Custom Scrollbars
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: #272730;
+  border-radius: 3px;
+  &:hover {
+    background: #373742;
+  }
+}
+
+.light-theme ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+  &:hover {
+    background: #94a3b8;
+  }
+}
+
+// Global Theme Styles
+body.dark-theme {
+  background-color: $dark-bg;
+  color: $dark-text-primary;
+
+  .app-sidebar {
+    background-color: $dark-sidebar-bg;
+    border-right: 1px solid $dark-border;
+  }
+
+  .app-main-content {
+    background-color: $dark-bg;
+  }
+
+  .border-divider {
+    border-color: $dark-border;
+  }
+  
+  .card-surface {
+    background-color: $dark-surface;
+    border: 1px solid $dark-border;
+  }
+}
+
+body.light-theme {
+  background-color: $light-bg;
+  color: $light-text-primary;
+
+  .app-sidebar {
+    background-color: $light-sidebar-bg;
+    border-right: 1px solid $light-border;
+  }
+
+  .app-main-content {
+    background-color: $light-bg;
+  }
+
+  .border-divider {
+    border-color: $light-border;
+  }
+
+  .card-surface {
+    background-color: $light-surface;
+    border: 1px solid $light-border;
+  }
+}
+
+// Text utils
+.text-secondary {
+  .dark-theme & { color: $dark-text-secondary; }
+  .light-theme & { color: $light-text-secondary; }
+}
+
+.text-muted {
+  .dark-theme & { color: $dark-text-muted; }
+  .light-theme & { color: $light-text-muted; }
+}
+
+.accent-color {
+  .dark-theme & { color: $dark-primary; }
+  .light-theme & { color: $light-primary; }
+}
+
+// Markdown formatting helper styles
+.markdown-container {
+  line-height: 1.6;
+  font-size: 14px;
+  
+  p, ul, ol, pre, blockquote, table {
+    margin-bottom: 12px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: $font-display;
+    font-weight: 600;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    color: inherit;
+  }
+
+  ul, ol {
+    padding-left: 20px;
+  }
+
+  li {
+    margin-bottom: 4px;
+  }
+
+  code {
+    font-family: $font-mono;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    
+    .dark-theme & {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: #f43f5e;
+    }
+    .light-theme & {
+      background-color: rgba(0, 0, 0, 0.05);
+      color: #be123c;
+    }
+  }
+
+  pre {
+    border-radius: 8px;
+    padding: 12px;
+    overflow-x: auto;
+    font-family: $font-mono;
+    font-size: 13px;
+    position: relative;
+    
+    .dark-theme & {
+      background-color: #17171e;
+      border: 1px solid $dark-border;
+    }
+    .light-theme & {
+      background-color: #f1f5f9;
+      border: 1px solid $light-border;
+    }
+
+    code {
+      background-color: transparent !important;
+      padding: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+  }
+
+  blockquote {
+    border-left: 4px solid;
+    padding-left: 12px;
+    font-style: italic;
+    
+    .dark-theme & {
+      border-color: $dark-border;
+      color: $dark-text-secondary;
+    }
+    .light-theme & {
+      border-color: $light-border;
+      color: $light-text-secondary;
+    }
+  }
+}
+
+// Common button actions
+.primary-btn {
+  background-color: $dark-primary;
+  color: white;
+  transition: $transition-smooth;
+  
+  &:hover {
+    background-color: $dark-primary-hover;
+  }
+  
+  .light-theme & {
+    background-color: $light-primary;
+    &:hover {
+      background-color: $light-primary-hover;
+    }
+  }
+}
+
+// Fade in microanimation
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in-entry {
+  animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+// Material Select & Form Field overrides for Dark Theme
+.dark-theme {
+  // Input select value text and placeholder
+  .mat-mdc-select-value-text {
+    color: #f3f4f6 !important;
+  }
+  .mat-mdc-select-value {
+    color: #f3f4f6 !important;
+  }
+  .mat-mdc-select-placeholder {
+    color: #9ca3af !important;
+  }
+  .mat-mdc-select-arrow svg {
+    fill: #9ca3af !important;
+  }
+
+  // Select panel dropdown overlay panel styling
+  .mat-mdc-select-panel {
+    background-color: #171721 !important;
+    border: 1px solid #262631 !important;
+  }
+  
+  .mat-mdc-option {
+    color: #f3f4f6 !important;
+    
+    &:hover:not(.mdc-list-item--disabled) {
+      background-color: rgba(255, 255, 255, 0.06) !important;
+    }
+    
+    &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+      background-color: rgba(99, 102, 241, 0.16) !important;
+      
+      .mdc-list-item__primary-text {
+        color: #818cf8 !important;
+      }
+    }
+  }
+
+  .mdc-list-item__primary-text {
+    color: #f3f4f6 !important;
+  }
+}
+
+// Global Snack Bar Aesthetic overrides
+.mat-mdc-snack-bar-container {
+  .mdc-snackbar__surface {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%) !important;
+    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .mdc-snackbar__label {
+    color: #ffffff !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+  }
+  
+  .mdc-snackbar__actions {
+    .mdc-button__label {
+      color: #ffd700 !important; // Gold Close button text
+      font-weight: 700 !important;
+      letter-spacing: 0.5px !important;
+    }
+  }
+}
+
+// Error SnackBar styling
+.error-snackbar {
+  &.mat-mdc-snack-bar-container, .mat-mdc-snack-bar-container {
+    .mdc-snackbar__surface {
+      background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%) !important;
+      box-shadow: 0 10px 25px -5px rgba(244, 63, 94, 0.35) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .mdc-snackbar__actions {
+      .mdc-button__label {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+      }
+    }
+  }
+}
+
+// Material Form Field & Input overrides for Dark Theme
+.dark-theme {
+  // Floating label styling
+  .mat-mdc-form-field-label,
+  .mat-mdc-floating-label,
+  .mdc-floating-label {
+    color: #9ca3af !important;
+  }
+
+  // Focus label color
+  .mat-mdc-form-field.mat-focused {
+    .mat-mdc-floating-label,
+    .mdc-floating-label {
+      color: #6366f1 !important;
+    }
+  }
+
+  // Active user text color
+  input.mat-mdc-input-element {
+    color: #f3f4f6 !important;
+  }
+
+  // Input placeholder text
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  // Outline border styling
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+  }
+
+  // Glowing borders on active focus
+  .mat-mdc-form-field.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #6366f1 !important;
+    }
+  }
+}

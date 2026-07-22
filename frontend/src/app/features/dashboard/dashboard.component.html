@@ -1,0 +1,376 @@
+<div class="dashboard-wrapper" [class.dark-theme]="authService.darkMode()" [class.light-theme]="!authService.darkMode()">
+  <!-- Mobile sidebar backdrop -->
+  @if (showSidebar()) {
+    <div class="sidebar-backdrop" (click)="showSidebar.set(false)"></div>
+  }
+  
+  <!-- 1. LEFT SIDEBAR -->
+  <aside class="app-sidebar" [class.sidebar-active]="showSidebar()">
+    <div class="sidebar-header border-divider">
+      <div class="brand">
+        <span class="material-icons brand-icon">insights</span>
+        <h2>Knowledge Workspace</h2>
+      </div>
+      <button mat-stroked-button class="new-chat-btn" (click)="createNewChat()">
+        <span class="material-icons">add</span> New Chat
+      </button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="search-box border-divider">
+      <div class="search-input-wrapper">
+        <span class="material-icons search-icon">search</span>
+        <input type="text" placeholder="Search chats..." [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)">
+      </div>
+    </div>
+
+    <!-- Scrollable Conversation Lists -->
+    <div class="conversation-list-container">
+      <!-- Pinned Section -->
+      @if (pinnedConversations().length > 0) {
+        <div class="section-label text-muted">PINNED</div>
+        <div class="conversation-group">
+          @for (conv of pinnedConversations(); track conv.id) {
+            <div class="conv-item" [class.active]="activeConversation()?.id === conv.id" (click)="editingConvId() === conv.id ? $event.stopPropagation() : selectConversation(conv)">
+              <span class="material-icons icon-pinned accent-color">push_pin</span>
+              
+              @if (editingConvId() === conv.id) {
+                <input type="text" class="rename-input" [ngModel]="editTitleText()" (ngModelChange)="editTitleText.set($event)" (click)="$event.stopPropagation()" (keydown.enter)="saveRename(conv); $event.stopPropagation()" (keydown.escape)="cancelRename()" autofocus>
+                <div class="inline-actions">
+                  <button mat-icon-button (click)="saveRename(conv); $event.stopPropagation()"><span class="material-icons">check</span></button>
+                  <button mat-icon-button (click)="cancelRename(); $event.stopPropagation()"><span class="material-icons">close</span></button>
+                </div>
+              } @else {
+                <span class="conv-title">{{ conv.title }}</span>
+                <div class="conv-actions">
+                  <button mat-icon-button matTooltip="Unpin" (click)="togglePin(conv, $event)"><span class="material-icons">push_pin</span></button>
+                  <button mat-icon-button matTooltip="Rename" (click)="startRename(conv, $event)"><span class="material-icons">edit</span></button>
+                  <button mat-icon-button matTooltip="Delete" (click)="deleteConversation(conv, $event)"><span class="material-icons text-danger">delete</span></button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        <mat-divider class="border-divider group-divider"></mat-divider>
+      }
+
+      <!-- Conversations Section -->
+      <div class="section-label text-muted">CHATS</div>
+      <div class="conversation-group">
+        @for (conv of unpinnedConversations(); track conv.id) {
+          <div class="conv-item" [class.active]="activeConversation()?.id === conv.id" (click)="editingConvId() === conv.id ? $event.stopPropagation() : selectConversation(conv)">
+            <span class="material-icons icon-normal text-muted">chat_bubble_outline</span>
+            
+            @if (editingConvId() === conv.id) {
+              <input type="text" class="rename-input" [ngModel]="editTitleText()" (ngModelChange)="editTitleText.set($event)" (click)="$event.stopPropagation()" (keydown.enter)="saveRename(conv); $event.stopPropagation()" (keydown.escape)="cancelRename()" autofocus>
+              <div class="inline-actions">
+                <button mat-icon-button (click)="saveRename(conv); $event.stopPropagation()"><span class="material-icons">check</span></button>
+                <button mat-icon-button (click)="cancelRename(); $event.stopPropagation()"><span class="material-icons">close</span></button>
+              </div>
+            } @else {
+              <span class="conv-title">{{ conv.title }}</span>
+              <div class="conv-actions">
+                <button mat-icon-button matTooltip="Pin to top" (click)="togglePin(conv, $event)"><span class="material-icons icon-rotate">push_pin</span></button>
+                <button mat-icon-button matTooltip="Rename" (click)="startRename(conv, $event)"><span class="material-icons">edit</span></button>
+                <button mat-icon-button matTooltip="Delete" (click)="deleteConversation(conv, $event)"><span class="material-icons">delete</span></button>
+              </div>
+            }
+          </div>
+        } @empty {
+          <div class="empty-state-list text-muted">No conversations found.</div>
+        }
+      </div>
+    </div>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer border-divider">
+      <div class="user-profile">
+        <div class="user-avatar">{{ (authService.currentUser()?.name || authService.currentUser()?.email)?.charAt(0)?.toUpperCase() || 'U' }}</div>
+        <div class="user-details">
+          <span class="user-email" [matTooltip]="authService.currentUser()?.email || ''" matTooltipPosition="above">
+            {{ authService.currentUser()?.name || authService.currentUser()?.email || 'Guest User' }}
+          </span>
+          <span class="user-role text-muted">{{ authService.currentUser()?.role === 'admin' ? 'Administrator' : 'User' }}</span>
+        </div>
+      </div>
+      
+      <div class="footer-actions">
+        @if (authService.isAdmin()) {
+          <button mat-icon-button matTooltip="Admin Dashboard" routerLink="/admin" class="footer-btn"><span class="material-icons">dashboard</span></button>
+        }
+        <button mat-icon-button matTooltip="Toggle Dark/Light Mode" (click)="authService.toggleTheme()" class="footer-btn">
+          <span class="material-icons">{{ authService.darkMode() ? 'light_mode' : 'dark_mode' }}</span>
+        </button>
+        <button mat-icon-button matTooltip="Sign Out" (click)="authService.logout()" class="footer-btn text-danger"><span class="material-icons">logout</span></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 2. CENTRAL CHAT AREA -->
+  <main class="app-main-content">
+    @if (!activeConversation()) {
+      <!-- Welcome Screen when no chat selected -->
+      <div class="welcome-screen fade-in-entry">
+        <!-- Floating menu button for mobile welcomes -->
+        <button mat-icon-button class="mobile-menu-btn welcome-mobile-btn" (click)="showSidebar.set(true)" matTooltip="Show Sidebar">
+          <span class="material-icons">menu</span>
+        </button>
+        <span class="material-icons welcome-logo">insights</span>
+        <h1>How can I help you today?</h1>
+        <p class="text-secondary">Select an existing conversation from the sidebar or click "New Chat" to begin. Upload reference documents to create an isolated knowledge base for the assistant.</p>
+        <button mat-flat-button color="primary" class="welcome-start-btn" (click)="createNewChat()">
+          <span class="material-icons">chat</span> Start New Session
+        </button>
+      </div>
+    } @else {
+      <!-- Active Chat Frame -->
+      <div class="chat-container">
+        <!-- Top Navigation Header -->
+        <header class="chat-header border-divider">
+          <div class="chat-header-info">
+            <button mat-icon-button class="mobile-menu-btn" (click)="showSidebar.set(true)" matTooltip="Show Sidebar">
+              <span class="material-icons">menu</span>
+            </button>
+            <span class="chat-header-title">{{ activeConversation()?.title }}</span>
+          </div>
+
+          <div class="chat-header-controls">
+            <!-- Dynamic LLM Selector -->
+            <div class="selector-pair">
+              <mat-form-field appearance="outline" class="inline-select provider-select">
+                <mat-select [value]="selectedProvider()" (selectionChange)="onProviderChange($event.value)">
+                  @for (p of providers; track p.value) {
+                    <mat-option [value]="p.value">{{ p.viewValue }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="inline-select model-select">
+                <mat-select [value]="selectedModel()" (selectionChange)="onModelChange($event.value)">
+                  @for (m of currentModels(); track m.value) {
+                    <mat-option [value]="m.value">{{ m.viewValue }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <!-- Documents Panel Toggle -->
+            <button mat-icon-button matTooltip="Toggle Document panel" (click)="showDocPanel.set(!showDocPanel())" [class.active-toggle]="showDocPanel()">
+              <span class="material-icons">folder_open</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Message History Scroller -->
+        <div class="message-scroller" #scrollContainer>
+          <div class="message-feed">
+            @for (msg of messages(); track msg.id) {
+              <div class="message-row" [class.user-row]="msg.role === 'user'">
+                <div class="message-bubble" [class.card-surface]="msg.role === 'assistant'" [class.user-bubble]="msg.role === 'user'">
+                  <!-- Message text formatted as Markdown -->
+                  @if (msg.role === 'assistant') {
+                    <div class="markdown-container" [innerHTML]="msg.content | markdown"></div>
+                  } @else {
+                    <p class="user-text">{{ msg.content }}</p>
+                  }
+
+                  <!-- Assistant Footer (Citations & Actions on same line) -->
+                  @if (msg.role === 'assistant') {
+                    <div class="bubble-divider"></div>
+                    
+                    @if (msg.citations && msg.citations.length > 0) {
+                      <div class="citations-label text-muted">
+                        <span class="material-icons citation-icon-small">menu_book</span> 
+                        Sources (Click to view source context):
+                      </div>
+                    }
+
+                    <div class="bubble-bottom-layout">
+                      @if (msg.citations && msg.citations.length > 0) {
+                        <div class="citations-list">
+                          @for (cit of msg.citations; track idx; let idx = $index) {
+                            <div class="citation-node" 
+                                 [class.selected-cit]="expandedCitationMsgId() === msg.id && expandedCitationIndex() === idx"
+                                 (click)="toggleCitation(msg.id, idx)"
+                                 [matTooltip]="'Click to view source snippet from ' + cit.filename + ' (p. ' + cit.page_number + ')'" 
+                                 matTooltipPosition="above">
+                              <span class="cit-filename">{{ cit.filename }}</span>
+                              <span class="cit-page">p. {{ cit.page_number }}</span>
+                            </div>
+                          }
+                        </div>
+                      } @else {
+                        <div class="spacer"></div>
+                      }
+
+                      <div class="msg-footer">
+                        <button mat-icon-button matTooltip="Copy Response" (click)="copyResponse(msg.content)"><span class="material-icons">content_copy</span></button>
+                        <button mat-icon-button matTooltip="Regenerate" (click)="retryMessage(msg)"><span class="material-icons">replay</span></button>
+                      </div>
+                    </div>
+
+                    <!-- Expanded Reference text card -->
+                    @if (msg.citations && msg.citations.length > 0 && expandedCitationMsgId() === msg.id && expandedCitationIndex() !== null) {
+                      <div class="expanded-citation-card fade-in-entry">
+                        <div class="expanded-cit-header text-secondary">
+                          <span>
+                            <span class="material-icons" style="font-size: 14px; vertical-align: -2px; margin-right: 4px; color: #6366f1;">format_quote</span>
+                            Source Excerpt from <strong>{{ msg.citations[expandedCitationIndex()!].filename }}</strong> (Page {{ msg.citations[expandedCitationIndex()!].page_number }})
+                          </span>
+                          <button mat-icon-button class="close-expanded-cit" (click)="closeCitation(); $event.stopPropagation()">
+                            <span class="material-icons">close</span>
+                          </button>
+                        </div>
+                        <div class="markdown-container expanded-cit-text" [innerHTML]="msg.citations[expandedCitationIndex()!].text | markdown"></div>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Active Streaming Message -->
+            @if (isGenerating()) {
+              <div class="message-row">
+                <div class="message-bubble assistant-bubble card-surface streaming-bubble">
+                  @if (!streamingMessageText()) {
+                    <div class="thinking-loader">
+                      <span class="material-icons rotating-icon">sync</span>
+                      <span class="loading-text">Searching database and generating response...</span>
+                    </div>
+                  } @else {
+                    <div class="markdown-container" [innerHTML]="streamingMessageText() | markdown"></div>
+                  }
+                  
+                  @if (streamingCitations().length > 0) {
+                    <div class="citations-container">
+                      <div class="citations-label text-muted"><span class="material-icons citation-icon-small">menu_book</span> Sources (Click to view source context):</div>
+                      <div class="citations-list">
+                        @for (cit of streamingCitations(); track idx; let idx = $index) {
+                          <div class="citation-node" 
+                               [class.selected-cit]="expandedCitationMsgId() === 'streaming' && expandedCitationIndex() === idx"
+                               (click)="toggleCitation('streaming', idx)"
+                               [matTooltip]="'Click to view source snippet from ' + cit.filename + ' (p. ' + cit.page_number + ')'" 
+                               matTooltipPosition="above">
+                            <span class="cit-filename">{{ cit.filename }}</span>
+                            <span class="cit-page">p. {{ cit.page_number }}</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Expanded Reference text card for Streaming -->
+                    @if (expandedCitationMsgId() === 'streaming' && expandedCitationIndex() !== null && streamingCitations()[expandedCitationIndex()!]) {
+                      <div class="expanded-citation-card fade-in-entry">
+                        <div class="expanded-cit-header text-secondary">
+                          <span>
+                            <span class="material-icons" style="font-size: 14px; vertical-align: -2px; margin-right: 4px; color: #6366f1;">format_quote</span>
+                            Source Excerpt from <strong>{{ streamingCitations()[expandedCitationIndex()!].filename }}</strong> (Page {{ streamingCitations()[expandedCitationIndex()!].page_number }})
+                          </span>
+                          <button mat-icon-button class="close-expanded-cit" (click)="closeCitation(); $event.stopPropagation()">
+                            <span class="material-icons">close</span>
+                          </button>
+                        </div>
+                        <div class="markdown-container expanded-cit-text" [innerHTML]="streamingCitations()[expandedCitationIndex()!].text | markdown"></div>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <footer class="chat-input-area border-divider">
+          <div class="input-form-wrapper card-surface">
+            <textarea 
+              rows="1" 
+              placeholder="Ask a question about the conversation's documents..." 
+              [ngModel]="inputText()" 
+              (ngModelChange)="inputText.set($event)"
+              (keydown.enter)="onKeyDown($event)"
+              autofocus>
+            </textarea>
+            
+            <div class="input-actions">
+              @if (isGenerating()) {
+                <button mat-fab color="warn" (click)="stopGeneration()" matTooltip="Stop generation" class="action-fab">
+                  <span class="material-icons">stop</span>
+                </button>
+              } @else {
+                <button mat-fab color="primary" [disabled]="!inputText().trim() || isGenerating()" (click)="sendMessage()" class="action-fab">
+                  <span class="material-icons">arrow_upward</span>
+                </button>
+              }
+            </div>
+          </div>
+          <div class="disclaimer-text text-muted">Answers are generated based solely on uploaded files. Ensure correct files are uploaded in this conversation.</div>
+        </footer>
+      </div>
+    }
+  </main>
+
+  <!-- 3. RIGHT COLLAPSIBLE DOCUMENTS PANEL -->
+  @if (activeConversation() && showDocPanel()) {
+    <aside class="app-sidebar documents-panel fade-in-entry">
+      <div class="sidebar-header border-divider flex-row-between">
+        <div class="brand">
+          <span class="material-icons text-muted">inventory_2</span>
+          <h2>Documents</h2>
+        </div>
+        <button mat-icon-button (click)="showDocPanel.set(false)"><span class="material-icons">close</span></button>
+      </div>
+
+      <!-- Drag & Drop Upload Zone -->
+      <div class="upload-zone border-divider" 
+           [class.drag-active]="isDragging()"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event)">
+        
+        <input type="file" id="fileInput" (change)="onFileSelected($event)" hidden accept=".pdf,.docx,.txt">
+        
+        @if (isUploading()) {
+          <div class="upload-loader">
+            <mat-spinner diameter="32"></mat-spinner>
+            <span class="upload-status text-muted">Extracting & indexing vectors...</span>
+          </div>
+        } @else {
+          <label for="fileInput" class="upload-label-trigger">
+            <span class="material-icons upload-cloud-icon">cloud_upload</span>
+            <span class="upload-main-text">Drag & drop or <span class="upload-browse">browse</span></span>
+            <span class="upload-sub-text text-muted">PDF, DOCX, or TXT up to 15MB</span>
+          </label>
+        }
+      </div>
+
+      <!-- Ingested Document List -->
+      <div class="document-list-scroll">
+        <div class="section-label text-muted">KNOWLEDGE BASE FILES</div>
+        
+        <div class="doc-list-group">
+          @for (doc of documents(); track doc.id) {
+            <div class="doc-item card-surface">
+              <span class="material-icons doc-type-icon text-muted">
+                {{ doc.mime_type === 'application/pdf' ? 'picture_as_pdf' : 'description' }}
+              </span>
+              <div class="doc-metadata">
+                <span class="doc-name" [matTooltip]="doc.filename">{{ doc.filename }}</span>
+                <span class="doc-size text-muted">{{ formatBytes(doc.file_size) }}</span>
+              </div>
+              <button mat-icon-button class="delete-doc-btn" matTooltip="Remove document" (click)="deleteDocument(doc, $event)">
+                <span class="material-icons text-danger">close</span>
+              </button>
+            </div>
+          } @empty {
+            <div class="empty-docs-state">
+              <span class="material-icons empty-docs-icon text-muted">folder_zip</span>
+              <p class="text-muted">No files in this conversation scope yet. Upload documents to query them.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </aside>
+  }
+</div>

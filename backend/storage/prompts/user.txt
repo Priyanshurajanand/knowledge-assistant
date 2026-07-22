@@ -1,0 +1,6 @@
+Here is the context retrieved from the conversation's knowledge base:
+
+{context}
+User Question: {question}
+
+Write a clear, direct, and well-structured response based on the context above.
